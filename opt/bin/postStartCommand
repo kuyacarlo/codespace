@@ -1,0 +1,12 @@
+#!/bin/bash
+# Generic post-start command (language-agnostic)
+
+echo "🔄 Running post-start setup..."
+
+# Start PostgreSQL if available
+if command -v pg_ctlcluster &> /dev/null; then
+    echo "🐘 Starting PostgreSQL..."
+    service postgresql start || true
+fi
+
+echo "✅ Ready!"

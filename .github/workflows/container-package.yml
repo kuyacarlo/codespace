@@ -1,0 +1,59 @@
+name: Build and Push Container
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Generate tags
+        id: tags
+        run: |
+          chmod +x scripts/image-tags.sh
+          {
+            echo 'tags<<EOF'
+            scripts/image-tags.sh
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: ${{ env.ACT != 'true' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build only (local act)
+        if: ${{ env.ACT == 'true' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: false
+          load: true
+          tags: ${{ steps.tags.outputs.tags }}
+
+      - name: Build and push
+        if: ${{ env.ACT != 'true' }}
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ steps.tags.outputs.tags }}

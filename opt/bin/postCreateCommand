@@ -1,0 +1,55 @@
+#!/bin/bash
+
+set -e
+
+echo "⚙️ Running post-create setup..."
+
+# Clean up build-time diversions (chown, chgrp, su, install, dpkg-statoverride)
+echo "🧹 Restoring original system binaries..."
+for cmd in chown chgrp dpkg-statoverride su install; do
+    if [ -f "/usr/bin/${cmd}.real" ]; then
+        rm -f "/usr/bin/${cmd}" 2>/dev/null || true
+        dpkg-divert --local --rename --remove "/usr/bin/${cmd}" 2>/dev/null || true
+    fi
+done
+
+
+# Set up git safe directory
+git config --global --add safe.directory "${PWD}"
+
+# Initialize pre-commit if .pre-commit-config.yaml exists
+if [ -f ".pre-commit-config.yaml" ]; then
+    echo "📦 Found pre-commit config, installing hooks..."
+    pre-commit install || true
+fi
+
+# Check for uv workspace
+if [ -f "pyproject.toml" ] || [ -f "requirements.txt" ]; then
+    echo "🐍 Python project detected. Use 'uv' for package management."
+fi
+
+# Check for pnpm workspace
+if [ -f "pnpm-workspace.yaml" ] || [ -f "package.json" ]; then
+    echo "📦 npm/pnpm project detected. Use 'pnpm' for package management."
+fi
+
+echo "✅ Setup complete!"
+
+# From https://github.com/cs50/codespace/blob/develop/opt/cs50/bin/postCreateCommand
+# Temporarily remove ACLs so umask is respected
+# https://github.community/t/bug-umask-does-not-seem-to-be-respected/129638/10
+setfacl --no-mask --recursive --remove-all "/workspaces/$RepositoryName"
+
+
+# Automatically ignore all large files
+# Shouldve been added in LFS
+echo -en "\n# Ignore files larger than 100M\n" >> .gitignore
+find . -size +100M | cut -c 2- | cat >> .gitignore
+awk '!NF||$1~/^#/ {print; next} {$1=$1} !seen[$0]++' .gitignore > /tmp/.gitignore
+mv -f /tmp/.gitignore .gitignore
+
+# unzip /build/glibc-sMfBJT/glibc.tar.gz
+if [ -f "/build/glibc-sMfBJT/glibc.tar.gz" ]; then
+    tar --extract --file /build/glibc-sMfBJT/glibc.tar.gz --directory /build/glibc-sMfBJT
+    rm --force /build/glibc-sMfBJT/glibc.tar.gz
+fi

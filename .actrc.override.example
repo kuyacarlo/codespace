@@ -1,0 +1,5 @@
+# Copy this file to .actrc.override to apply local repository-specific overrides.
+# Example: pin a different base image for ubuntu-latest
+# -P ubuntu-latest=ghcr.io/catthehacker/ubuntu:full-latest
+# Example: override ACT marker if needed
+# --env ACT=true
