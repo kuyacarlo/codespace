@@ -19,5 +19,11 @@
         "esbenp.prettier-vscode"
       ]
     }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+      "moby": false // avoids trying to install docker-ce, just gives docker CLI
+    },
+    "ghcr.io/devcontainers-extra/features/act:1": {}
   }
 }
