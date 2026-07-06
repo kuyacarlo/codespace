@@ -1,92 +1,23 @@
 {
+  "name": "codespace-refactored",
+
   "build": {
     "dockerfile": "Dockerfile",
-    "context": ".",
-    "args": {
-      "GH_VERSION": "2.56.0",
-      "ACT_VERSION": "0.2.70",
-      "DOCKER_CLI_VERSION": "27.1.1",
-      "UV_VERSION": "0.5.20",
-      "PNPM_VERSION": "9.12.2",
-      "BUILDX_VERSION": "0.19.3"
-    }
+    "context": "."
   },
-  "remoteUser": "root",
-  "containerUser": "root",
-  "initializeCommand": "bash scripts/detect-socket.sh",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
-      "moby": false // avoids trying to install docker-ce, just gives docker CLI
-    },
-    "ghcr.io/devcontainers-extra/features/act:1": {}
-  },
-  "mounts": [
-    "source=${localEnv:HOME}/.devcontainer-socket.sock,target=/var/run/docker.sock,type=bind",
-    "source=${localEnv:HOME}/.devcontainer-socket.sock,target=/var/run/docker-host.sock,type=bind"
-  ],
-  "remoteEnv": {
-    "DOCKER_HOST": "unix:///var/run/docker.sock"
-  },
+
+  "remoteUser": "vscode",
+  // "workspaceFolder": "/workspaces/codespace",
+
+  "postCreateCommand": "bash postCreateCommand",
+
   "customizations": {
     "vscode": {
       "extensions": [
-        // Git & GitHub
-        "GitHub.vscode-pull-request-github",
-        "eamodio.gitlens",
-
-        // Scripting & Tooling
-        "mads-hartmann.bash-ide-vscode",
-        "timonwong.shellcheck",
-        "esbenp.prettier-vscode",
-        "mikestead.dotenv",
-        "yzhang.markdown-all-in-one",
-
-        // Python & Ruff
         "ms-python.python",
-        "ms-python.vscode-pylance",
-        "charliermarsh.ruff",
-        "ms-python.debugpy",
-        "ms-toolsai.jupyter",
-
-        // Go Development
-        "golang.go",
-
-        // C/C++ (build-essential)
-        "ms-vscode.cpptools",
-        "ms-vscode.cmake-tools",
-
-        // Web Frontend & Styling (Next/React, Tailwind, SCSS, Django)
-        "bradlc.vscode-tailwindcss",
-        "sibiraj-s.vscode-scss-formatter",
-        "batisteo.vscode-django",
-        "wholroyd.jinja",
-
-        // Databases & SQL
-        "mtxr.sqltools",
-        "mtxr.sqltools-driver-pg",
-        "mtxr.sqltools-driver-sqlite",
-        "qwtel.sqlite-viewer",
-        "randomfractalsinc.duckdb-sql-tools",
-
-        // Config Formats & API Specs
-        "tamasfe.even-better-toml",
-        "redhat.vscode-yaml",
         "ms-azuretools.vscode-docker",
-        "42crunch.vscode-openapi"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh"
-      }
+        "esbenp.prettier-vscode"
+      ]
     }
-  },
-  "postCreateCommand": "/opt/bin/postCreateCommand",
-  "postStartCommand": "/opt/bin/postStartCommand",
-  "forwardPorts": [5432],
-  "portsAttributes": {
-    "5432": {
-      "label": "PostgreSQL",
-      "onAutoForward": "notify"
-    }
-  },
-  "workspaceFolder": "/workspaces/codespace"
+  }
 }
